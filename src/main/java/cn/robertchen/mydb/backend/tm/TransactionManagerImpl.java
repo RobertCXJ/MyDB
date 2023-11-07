@@ -49,26 +49,23 @@ public class TransactionManagerImpl implements TransactionManager {
         long fileLen = 0;
         try {
             fileLen = file.length();
-        } catch (IOException e) {
+        } catch (IOException e1) {
             Panic.panic(Error.BadXIDFileException);
         }
-        // 文件长度小于8字节说明非法
-        if (fileLen < LEN_XID_HEADER_LENGTH) {
+        if(fileLen < LEN_XID_HEADER_LENGTH) {
             Panic.panic(Error.BadXIDFileException);
         }
-        // 分配8字节大小
+
         ByteBuffer buf = ByteBuffer.allocate(LEN_XID_HEADER_LENGTH);
         try {
-            // 文件管道的位置移动到文件开头，将xid文件所有数据刷到buf
             fc.position(0);
             fc.read(buf);
         } catch (IOException e) {
             Panic.panic(e);
         }
-        // 获取事务的数量xid，从buf中解析出8个字节的内容，也就是事务的数量
         this.xidCounter = Parser.parseLong(buf.array());
         long end = getXidPosition(this.xidCounter + 1);
-        if (end != fileLen) {
+        if(end != fileLen) {
             Panic.panic(Error.BadXIDFileException);
         }
     }
